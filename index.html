@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>傷仲永 - 課文學習平台</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f6f7;
+            --text-color: #333;
+            --card-bg: #fff;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #34495e;
+            padding: 0.5rem;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: var(--accent-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        h4 {
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        /* 原文樣式 */
+        .original-text p {
+            font-size: 1.1rem;
+            text-align: justify;
+            margin-bottom: 1.5rem;
+        }
+
+        .annotation-ref {
+            color: var(--accent-color);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9em;
+            vertical-align: super;
+        }
+
+        /* 註釋氣泡 */
+        .tooltip {
+            display: none;
+            position: absolute;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            max-width: 250px;
+        }
+
+        /* 語譯對照 */
+        .translation-row {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        .translation-row:last-child {
+            border-bottom: none;
+        }
+        .trans-orig {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .trans-text {
+            color: #555;
+        }
+
+        /* 測驗樣式 */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: #e9ecef;
+        }
+
+        .quiz-option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .quiz-option.wrong {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* 賞析列表樣式 */
+        ul, ol {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.2rem; }
+            nav button { padding: 0.5rem; font-size: 0.9rem; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>傷仲永 - 王安石</h1>
+</header>
+
+<nav>
+    <button onclick="showSection('text')" class="active" id="btn-text">課文</button>
+    <button onclick="showSection('translation')" id="btn-translation">語譯</button>
+    <button onclick="showSection('analysis')" id="btn-analysis">賞析</button>
+    <button onclick="showSection('quiz')" id="btn-quiz">測驗</button>
+</nav>
+
+<div class="container">
+
+    <!-- Section 1: Text -->
+    <div id="text" class="section active">
+        <div class="card">
+            <h2>原文閱讀</h2>
+            <div class="original-text">
+                <p>
+                    金溪民方仲永，世隸耕<span class="annotation-ref" data-note="世代以耕種為業">1</span>。仲永生五年，未嘗識書具，忽啼求之。父異焉<span class="annotation-ref" data-note="對此感到驚異">2</span>，借旁近與之，即書詩四句，並自為名。其詩以養父母、收族<span class="annotation-ref" data-note="團結族人">3</span>為意，傳一鄉秀才觀之。自是指物作詩立就<span class="annotation-ref" data-note="立刻完成">4</span>，其文理皆有可觀者。邑人奇之<span class="annotation-ref" data-note="對此感到驚奇">5</span>，稍稍賓客其父<span class="annotation-ref" data-note="把他的父親當作賓客招待">6</span>，或以錢幣乞之。父利其然也<span class="annotation-ref" data-note="認為這樣有利可圖">7</span>，日扳<span class="annotation-ref" data-note="同「攀」，牽引，這裡指帶著">8</span>仲永環謁<span class="annotation-ref" data-note="四處拜訪">9</span>於邑人，不使學。
+                </p>
+                <p>
+                    余聞之也久。明道中，從先人還家，於舅家見之，十二三矣。令作詩，不能稱<span class="annotation-ref" data-note="相當、相稱">10</span>前時之聞。又七年，還自揚州，復到舅家問焉。曰：「泯然<span class="annotation-ref" data-note="消失的樣子">11</span>眾人矣。」
+                </p>
+                <p>
+                    王子曰：仲永之通悟<span class="annotation-ref" data-note="通達聰慧">12</span>，受之天也。其受之天也，賢於材人遠矣。卒<span class="annotation-ref" data-note="最終">13</span>之為眾人，則其受於人者不至也。彼其受之天也，如此其賢也，不受之人，且為眾人；今夫不受之天，固眾人，又不受之人，得為眾人而已邪？
+                </p>
+            </div>
+            <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                <p>💡 點擊紅色標註文字可查看註釋。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Translation -->
+    <div id="translation" class="section">
+        <div class="card">
+            <h2>語譯對照</h2>
+            
+            <div class="translation-row">
+                <div class="trans-orig">金溪民方仲永，世隸耕。</div>
+                <div class="trans-text">金溪縣百姓方仲永，世代以耕種為業。</div>
+            </div>
+            
+            <div class="translation-row">
+                <div class="trans-orig">仲永生五年，未嘗識書具，忽啼求之。</div>
+                <div class="trans-text">仲永長到五歲時，不曾認識書寫工具，忽然哭著要這些東西。</div>
+            </div>
+
+            <div class="translation-row">
+                <div class="trans-orig">父異焉，借旁近與之，即書詩四句，並自為名。</div>
+                <div class="trans-text">父親對此感到驚異，從鄰居家借來給他，他當即寫了四句詩，並且題上自己的名字。</div>
+            </div>
+
+            <div class="translation-row">
+                <div class="trans-orig">自是指物作詩立就，其文理皆有可觀者。</div>
+                <div class="trans-text">從此，指定事物讓他作詩，他能立刻完成，詩的文采和道理都有值得欣賞的地方。</div>
+            </div>
+
+            <div class="translation-row">
+                <div class="trans-orig">邑人奇之，稍稍賓客其父，或以錢幣乞之。</div>
+                <div class="trans-text">同縣的人對他感到驚奇，漸漸地請他的父親去做客，有的人還用錢幣求仲永寫詩。</div>
+            </div>
+
+            <div class="translation-row">
+                <div class="trans-orig">父利其然也，日扳仲永環謁於邑人，不使學。</div>
+                <div class="trans-text">他的父親認為這樣有利可圖，每天牽著仲永四處拜訪同縣的人，不讓他學習。</div>
+            </div>
+
+            <div class="translation-row">
+                <div class="trans-orig">令作詩，不能稱前時之聞。......曰：「泯然眾人矣。」</div>
+                <div class="trans-text">（十二三歲時）叫他作詩，已經不能與以前的名聲相稱了。......（又過了七年）舅舅說：「他的才華已經消失，成為普通人了。」</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Analysis (詳細版) -->
+    <div id="analysis" class="section">
+        
+        <!-- 主旨與立意 -->
+        <div class="card">
+            <h3>📖 主旨與立意：借事說理</h3>
+            <p>本文以「勸學」為主旨，運用了<strong>借事說理</strong>（先敘後議）的手法。</p>
+            <p>作者透過記述方仲永由一名五歲能詩的神童，因缺乏後天培育而最終變成普通人的真實事例，說明<strong>後天教育對成才的重要性</strong>。</p>
+            <p>作者的觀點非常明確：</p>
+            <ul>
+                <li>即使天賦極高（受之天），若沒有後天的教育（受於人），最終也會淪為普通人。</li>
+                <li>如果天賦本來就普通，後天又不努力學習，那麼下場將連普通人都不如。</li>
+            </ul>
+        </div>
+
+        <!-- 文章結構 -->
+        <div class="card">
+            <h3>🏗️ 文章結構與脈絡</h3>
+            <p>全文結構嚴謹，脈絡清晰，分為敘事與議論兩大部分：</p>
+            
+            <h4>1. 敘事部分（第一、二段）</h4>
+            <ul>
+                <li><strong>神童時期：</strong>記述仲永五歲時「指物作詩立就」，展現驚人天賦。但父親「利其然」，每天帶他四處拜訪賺錢，<strong>「不使學」</strong>三字成為仲永命運轉折的關鍵伏筆。</li>
+                <li><strong>衰退時期：</strong>
+                    <ul>
+                        <li>十二三歲時：才華已「不能稱前時之聞」（配不上以前的名聲）。</li>
+                        <li>又七年後：完全「泯然眾人矣」（跟普通人沒分別）。</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>2. 議論部分（第三段）</h4>
+            <p>作者借仲永的結局展開議論，點明題旨，強調「受於人」（後天教育）的重要性。</p>
+        </div>
+
+        <!-- 議論層次 -->
+        <div class="card">
+            <h3>🗣️ 層層遞進的議論邏輯</h3>
+            <p>第三段的議論富說服力，邏輯層層深入，可細分為四個層次：</p>
+            <ol>
+                <li><strong>確認天賦：</strong>「仲永之通悟，受之天也。」——承認仲永的才華是上天賦予的。</li>
+                <li><strong>分析原因：</strong>「卒之為眾人，則其受於人者不至也。」——指出他最終成為普通人，是因為後天教育沒有達到要求。</li>
+                <li><strong>推論（由高至低）：</strong>「彼其受之天也......不受之人，且為眾人。」——像仲永這樣天賦極高的人，不學習尚且成為普通人。</li>
+                <li><strong>警示（針對凡人）：</strong>「今夫不受之天......得為眾人而已邪？」——資質本就普通的常人，若不學習，恐怕連做個普通人都做不到（將成為庸才）。</li>
+            </ol>
+        </div>
+
+        <!-- 寫作特色 -->
+        <div class="card">
+            <h3>✍️ 寫作特色：煉字與詞性活用</h3>
+            <p>本文用字精煉，作者善於改變詞語的詞性（轉品）來豐富文意：</p>
+            <ul>
+                <li><strong>「傷」仲永：</strong>標題的「傷」字一針見血，表達了作者對仲永遭遇的<strong>哀傷與感嘆</strong>，同時製造懸念，吸引讀者閱讀。</li>
+                <li><strong>稍稍「賓客」其父：</strong>名詞作動詞用。意指同鄉的人以<strong>賓客之禮</strong>款待仲永的父親，側面描寫當時仲永受歡迎的程度。</li>
+                <li><strong>父「利」其然也：</strong>名詞作動詞用。意指父親<strong>以......為利（認為這樣有利可圖）</strong>，生動地刻畫出父親貪圖小利、目光短淺的形象。</li>
+                <li><strong>邑人「奇」之：</strong>形容詞作動詞用。意指同鄉對仲永的才能感到<strong>驚奇</strong>。</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Section 4: Quiz -->
+    <div id="quiz" class="section">
+        <div class="card">
+            <h2>自我測驗</h2>
+            
+            <div class="quiz-item" id="q1">
+                <p><strong>1. 文中「父利其然也」的「利」字是什麼意思？</strong></p>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">順利</button>
+                <button class="quiz-option" onclick="checkAnswer(this, true)">以...為利（認為有利可圖）</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">鋒利</button>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="quiz-item" id="q2">
+                <p><strong>2. 方仲永最終「泯然眾人」的主要原因是什麼？</strong></p>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">天資不夠高</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">沒有遇到名師</button>
+                <button class="quiz-option" onclick="checkAnswer(this, true)">父親不讓他學習（不使學）</button>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="quiz-item" id="q3">
+                <p><strong>3. 本文主要運用的寫作手法是什麼？</strong></p>
+                <button class="quiz-option" onclick="checkAnswer(this, true)">先敘後議（借事說理）</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">借景抒情</button>
+                <button class="quiz-option" onclick="checkAnswer(this, false)">托物言志</button>
+                <div class="feedback"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    // Tab Switching Logic
+    function showSection(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('.section').forEach(sec => {
+            sec.classList.remove('active');
+        });
+        // Remove active class from buttons
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected section
+        document.getElementById(sectionId).classList.add('active');
+        document.getElementById('btn-' + sectionId).classList.add('active');
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+    }
+
+    // Annotation Tooltip Logic
+    const tooltip = document.getElementById('tooltip');
+    const annotations = document.querySelectorAll('.annotation-ref');
+
+    annotations.forEach(anno => {
+        anno.addEventListener('click', (e) => {
+            const note = e.target.getAttribute('data-note');
+            tooltip.textContent = note;
+            tooltip.style.display = 'block';
+            
+            // Positioning
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = (rect.left + window.scrollX - 20) + 'px';
+            tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 3000);
+        });
+    });
+
+    // Hide tooltip when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('annotation-ref')) {
+            tooltip.style.display = 'none';
+        }
+    });
+
+    // Quiz Logic
+    function checkAnswer(btn, isCorrect) {
+        const parent = btn.parentElement;
+        const feedback = parent.querySelector('.feedback');
+        
+        // Disable all buttons in this question
+        const buttons = parent.querySelectorAll('.quiz-option');
+        buttons.forEach(b => b.disabled = true);
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            feedback.textContent = "✅ 答對了！";
+            feedback.style.color = "green";
+        } else {
+            btn.classList.add('wrong');
+            feedback.textContent = "❌ 答錯了，請再讀一遍課文。";
+            feedback.style.color = "red";
+            
+            // Highlight the correct answer
+            buttons.forEach(b => {
+                if (b.getAttribute('onclick').includes('true')) {
+                    b.classList.add('correct');
+                }
+            });
+        }
+        feedback.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
